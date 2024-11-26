@@ -1,0 +1,42 @@
+git bash
+1. 프로젝트 빌드
+asin@jsh MINGW64 /c/dev10/ws_sts426/myweb
+$ ./gradlew build
+
+2. EC2에 전송 - github는 용량제한이 있다. 25MB
+asin@jsh MINGW64 /c/dev10/ws_sts426/myweb/build/libs
+$ scp -i "C:\aws_key\aws-green.pem" myweb-2.0.1-SNAPSHOT.jar ubuntu@43.201.129.187:/home/ubuntu/aws/
+myweb-2.0.1-SNAPSHOT.jar        
+
+3. 애플리케이션 실행
+root@ip-172-31-41-76:/home/ubuntu/aws# java -jar myweb-2.0.1-SNAPSHOT.jar
+
+** EC2에서 파일 쓰기/읽기가 되지 않을 때 디렉토리 권한 설정을 확인하자.
+root@ip-172-31-41-76:/home/ubuntu/aws# sudo chmod -R 777 /home/ubuntu/aws/uploads/
+drwxrwxrwx 2 ubuntu ubuntu     4096 Nov 26 15:48 uploads
+
+** EC2에서 ResourceHandler 적용시 "file://"로 한다. Windows 기반일 때는 슬래시가 한개 더 있다. (file:///)
+registry.addResourceHandler("/images/**")
+				.addResourceLocations("file://" + uploadPath + "/");
+
+** EC2에 배포 시 upload 폴더 지정
+# 파일 저장 경로
+file.upload-dir=/home/ubuntu/aws/uploads
+
+** netstat -nlpt 명령 실행 안될 때는 
+sudo apt install net-tools 설치부터 할것!
+
+** EC2 서버에 폴더 생성하기
+mkdir -p /home/ubuntu/aws/uploads/
+chmod 777 /home/ubuntu/aws/uploads/
+
+
+로컬에서 AWS EC2 인스턴스로 파일을 업로드하려면 scp 명령어를 사용하는 것이 일반적입니다. 다음 단계를 따라 파일을 업로드하세요:
+
+전제 조건
+EC2 인스턴스의 퍼블릭 IP 주소를 알고 있어야 합니다.
+EC2에 연결할 수 있는 SSH 키 파일 (.pem 파일)이 로컬에 있어야 합니다.
+EC2 보안 그룹에서 **SSH(포트 22)**가 열려 있어야 합니다
+
+** ssh로 EC2 인스턴스에 접속하기
+ssh -i "C:\path\to\your-key.pem" ubuntu@<EC2-퍼블릭-IP>
